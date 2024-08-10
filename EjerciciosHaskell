@@ -1,0 +1,221 @@
+Ejercicios de haskell
+
+1:Dada una lista de números naturales calcular el número natural formado con los elementos de la lista.
+FORMA 1
+ghci> :{
+ghci| funcion1 = foldl (\lista x -> lista * 10 + x) 0
+ghci| :}
+ghci> funcion1 [3,2,8]
+328
+FORMA 2
+ghci> :{
+ghci| funcion1R [] = 0
+ghci| funcion1R (x:xs) = x * 10 ^ length xs + funcion1R xs
+ghci| :}
+ghci> funcion1R [5,5,8,9,3,8,5,8,2]
+558938582
+
+2:Dada una lista de números naturales y un numero “n” eliminar las “m” ocurrencia de los elementos “n” de dicha lista.
+FORMA 1
+ghci> :{
+ghci| funcion2 = foldl (\lista x -> if x == n then lista else x:lista) []
+ghci| :}
+ghci> funcion2 [5,5,8,9,3,8,5,8,2] 8
+[5,5,9,3,5,8,2]
+FORMA 2
+ghci> :{
+ghci| funcion2R [] _ = []
+ghci| funcion2R (x:xs) n = if x == n then xs else x:funcion2R xs n
+ghci| :}
+ghci> funcion2R [5,5,8,9,3,8,5,8,2] 8
+[5,5,9,3,5,8,2]
+FORMA 3
+ghci> :{
+ghci| funcion2 _ 0 xs = xs
+ghci| funcion2 _ _ [] = []
+ghci| funcion2 n m (x:xs) | n == x = funcion2 n (m-1) xs | otherwise = x : funcion2 n m xs
+ghci| :}
+ghci> funcion2 2 2 [1,2,2,2,5,7,2,8]
+[1,2,5,7,2,8] 
+
+3:Dada 2 lista de números enteros obtener una tercera lista ordenada descendentemente que contenga todos los elementos de ambas listas.
+FORMA 1
+ghci> :{
+ghci| funcion3 = foldr (++) [] . map (\x -> reverse . sort $ x)
+ghci| :}
+ghci> funcion3 [[1,2,3],[3,4,5],[5,6,7]]
+[[7,6,5],[5,4,3],[3,2,1]]
+FORMA 2
+ghci> :{
+ghci| desc x [] = [x]
+ghci| desc x (y:ys)| x > y = x:y:ys| otherwise = y:desc x ys
+ghci| :}
+ghci> desc 5 [1,3,8,4]
+[5,1,3,8,4]
+ghci> desc 5 [8,3,1,2]
+[8,5,3,1,2]
+ghci> desc 5 [8,7,6,1,2]
+[8,7,6,5,1,2]
+ghci> :{
+ghci| listaD [] = []
+ghci| listaD (x:xs) = desc x (listaD xs)
+ghci| :}
+ghci> listaD [3,5,8,9]
+[9,8,5,3]
+ghci> listaD [3,5,9,8]
+[9,8,5,3]
+ghci> funcion3 xs ys = listaD (xs ++ ys)
+ghci> funcion3 [1, 5, 6] [2, 4, 8]
+[8,6,5,4,2,1]
+
+4:Dada una Base de Datos de 10 alumnos, conteniendo sus códigos, apellido paterno, apellido materno, nombre y promedio, se solicita el menor promedio, mayor promedio y el promedio del promedio. No usar funciones aplicadas a listas
+
+data Alumno = Alumno { codigo :: Int, apellidoPaterno :: String, apellidoMaterno :: String, nombre :: String, promedio :: Float } deriving (Show)
+
+baseDeDatos = [ Alumno 1 "Perez" "Gomez" "Juan" 14.5, Alumno 2 "Lopez" "Martinez" "Ana" 16.0, Alumno 3 "Garcia" "Rodriguez" "Luis" 13.0, Alumno 4 "Hernandez" "Fernandez" "Maria" 15.5, Alumno 5 "Martinez" "Lopez" "Carlos" 17.0, Alumno 6 "Sanchez" "Gonzalez" "Jose" 12.5, Alumno 7 "Ramirez" "Hernandez" "Sara" 18.0, Alumno 8 "Diaz" "Garcia" "Laura" 11.0, Alumno 9 "Cruz" "Martinez" "Pablo" 14.0, Alumno 10 "Mendoza" "Perez" "Sofia" 19.0 ]
+
+ghci> :{
+ghci| menorPromedio [] = error "La lista vacía"
+ghci| menorPromedio [x] = promedio x
+ghci| menorPromedio (x:xs) = min (promedio x) (menorPromedio xs)
+ghci| :}
+ghci> :{
+ghci| mayorPromedio [] = error "La lista vacía"
+ghci| mayorPromedio [x] = promedio x
+ghci| mayorPromedio (x:xs) = max (promedio x) (mayorPromedio xs)
+ghci| :}
+ghci> :{
+ghci| longitud [] = 0
+ghci| longitud (_:xs) = 1 + longitud xs
+ghci| :}
+ghci> :{
+ghci| sumaPromedios [] = 0
+ghci| sumaPromedios (x:xs) = promedio x + sumaPromedios xs
+ghci| :}
+ghci> :{
+ghci| promedioPromedios xs = sumaPromedios xs / fromIntegral (longitud xs)
+ghci| :}
+ghci> let alumnos = baseDeDatos
+ghci> menorPromedio alumnos
+11.0
+ghci> mayorPromedio alumnos
+19.0
+ghci> promedioPromedios alumnos
+15.05
+
+5: Dado una lista de números enteros devolver una tripla formada por la suma de los cuadrados de los numero pares, la suma de los cuadrados de los números impares y un indicador que identifique al mayor de los dos números función5 [1,2,3,4,5] el resultado será una tripla ( 4+16,1+9+25 , “El segundo es mayor” ) y si el primer elemento de la tripla es mayor, el mensaje de será “El primero es mayor”
+
+ghci> funcion5 xs = (sP,sI,m) where sP = sum[x^2|x<-xs,even x]; sI=sum[x^2|x<-xs,odd x]; m|sP>sI="P"|sI>sP="I"|otherwise = "Igual"
+ghci> funcion5 [1,2,3,4,5]
+(20,35,"I")
+ghci> funcion5 [2,3,5,7]
+(4,83,"I")
+ghci> funcion5 [5,8,9]
+(64,106,"I")
+ghci> funcion5 [5,8,9,10]
+(164,106,"P")  
+
+6: Dado un punto en el plano cartesiano utilizar la definición de tipos de datos definir las funciones que permitan que dicho punto se mueva a una nueva posición en el sentido de los 4 puntos cardinales y una combinación de ellos
+ghci> :{
+ghci| data Punto = Punto Float Float deriving (Show)
+ghci| moverNorte (Punto x y) d = Punto x (y + d)
+ghci| moverSur (Punto x y) d = Punto x (y - d)
+ghci| moverEste (Punto x y) d = Punto (x + d) y
+ghci| moverOeste (Punto x y) d = Punto (x - d) y
+ghci| moverNoreste p d = moverEste (moverNorte p d) d
+ghci| moverNoroeste p d = moverOeste (moverNorte p d) d
+ghci| moverSureste p d = moverEste (moverSur p d) d
+ghci| moverSuroeste p d = moverOeste (moverSur p d) d
+ghci| :}
+ghci> let puntoInicial = Punto 0 0
+ghci> let distancia = 5.0
+ghci> puntoInicial
+Punto 0.0 0.0
+ghci> moverNorte puntoInicial distancia
+Punto 0.0 5.0
+ghci> moverSur puntoInicial distancia
+Punto 0.0 (-5.0)
+ghci> moverEste puntoInicial distancia
+Punto 5.0 0.0
+ghci> moverOeste puntoInicial distancia
+Punto (-5.0) 0.0
+
+
+7: Dada un lista filtrar los elementos pares usando lambdas
+
+ghci> :{
+ghci| filtrarPares [] = []
+ghci| filtrarPares (x:xs) = if even x then x:filtrarPares xs else filtrarPares xs
+ghci| :}
+ghci> filtrarPares [1,2,3,4,5,6,7,8,9]
+[2,4,6,8]
+ghci> filtrarPares [1,3,5,7,9]
+[
+    
+]
+
+8:Desarrolle una funcion, en la que se ingresen 5 numeros enteros  positivos y realice las cuatro operaciones basicas tomando el mayor y el menor de la lista de numeros. No utilice listas, tampoco utilice las funciones hasekll min o max. 
+
+ghci> min2 x y = if x<y then x else y
+ghci> max2 x y = if x>y then x else y
+ghci> menor a b c d e = min2 a (min2 b (min2 c (min2 d e)))
+ghci> mayor a b c d e = max2 a (max2 b (max2 c (max2 d e)))
+ghci> menor 3 5 2 1 6
+1
+ghci> mayor 3 5 2 1 6
+6
+ghci> suma a b c d e = mayor a b c d e + menor a b c d e
+ghci> resta a b c d e = mayor a b c d e - menor a b c d e
+ghci> multi a b c d e = mayor a b c d e * menor a b c d e
+ghci> div a b c d e = mayor a b c d e / menor a b c d e
+ghci> operacion a b c d e x |x==0=suma a b c d e|x==1=resta a b c d e|x==2=multi a b c d e|x==3=div a b c d e
+
+9:Dadas unas lista de listas y un numero natural “n”, multiplicar los elementos de cada sublista por “n” si la cantidad de elementos de la sublista es menos que “n”
+
+ghci> multiplicarSublistas listas n = map (\sublista -> if length sublista < n then map (*n) sublista else sublista) listas
+ghci> let listas = [[1, 2], [3, 4, 5], [6], [7, 8, 9, 10]]
+ghci> let n = 3
+ghci> multiplicarSublistas listas n
+[[3,6],[3,4,5],[18],[7,8,9,10]]
+
+10:Dada una lista determina el producto de dicha lista con su inversa. No utilice la función reverse 
+
+ghci> :{
+ghci| invertirLista [] = []
+ghci| invertirLista (x:xs) = invertirLista xs ++ [x]
+ghci| :}
+ghci> invertirLista [1,2,3,5]
+[5,3,2,1]
+ghci> :{
+ghci| productoE (x:xs) (y:ys)= x*y + productoE xs ys
+ghci| productoE [] []=0
+ghci| :}
+ghci> productoE [1,2] [2,5]
+12
+ghci> productoConInversa lista = productoE lista (invertirLista lista)
+ghci> productoConInversa [1, 2, 3, 4, 5]
+
+11:Dado un numero natural “n” hallar todos los números primos entre 1 y “n”
+
+ghci> :{
+ghci| listaN n = [2..n]
+ghci| :}
+ghci> :{
+ghci| cribaEratostenes [] = []
+ghci| cribaEratostenes (x:xs) = x : cribaEratostenes (filter (\y -> y `mod` x /= 0) xs)
+ghci| :}
+ghci> numerosPrimos n = cribaEratostenes (listaN n)
+ghci> numerosPrimos 50
+[2,3,5,7,11,13,17,19,23,29,31,37,41,43,47]
+
+12: Dada un lista de numero naturales, verificar si la lista esta ordenada 
+
+ghci> :{
+ghci| listaOrdenada [] = True
+ghci| listaOrdenada [x] = True
+ghci| listaOrdenada (x:y:xs) = x <= y && listaOrdenada (y:xs)
+ghci| :}
+ghci> listaOrdenada [1,2,3,4,5]
+True
+ghci> listaOrdenada [1,2,3,5,4]
+False
